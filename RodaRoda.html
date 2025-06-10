@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+  <title>Jogo Estilo Roda a Roda</title>
+  <style>
+    body {
+      background: url(img/Design\ sem\ nome.png) no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    .board {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 800px;
+      margin: 0 auto 30px;
+      margin-top: 150px;
+    }
+    .tile {
+      width: 40px;
+      height: 40px;
+      color: rgb(0, 0, 0);
+      border: 2px solid #7a7373;
+      margin: 5px;
+      font-size: 24px;
+      text-transform: uppercase;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .controls {
+    
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+      /* margin-top: 200px; */
+    }
+    input[type="text"] {
+      font-size: 18px;
+      padding: 5px;
+      width: 100px;
+      text-transform: uppercase;
+    }
+    button {
+      padding: 5px 10px;
+      font-size: 18px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .used-letters {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      display: inline-block;
+    }
+    .used-letters span {
+      margin: 0 5px;
+      font-weight: bold;
+      color: #FFD700;
+    }
+    .hint {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quem sou eu na rede?</h1>
+  <p class="hint" id="hint">Dica: "Sou como o cérebro da rede. Organizo usuários e permissões."</p>
+  <div class="board" id="board"></div>
+
+  <div class="controls">
+    <input type="text" id="letterInput" maxlength="1">
+    <button onclick="guessLetter()">Tentar</button>
+    <button onclick="previousWord()">Pergunta Anterior</button>
+    <button onclick="nextWord()">Próxima Pergunta</button>
+  </div>
+
+  <div class="used-letters" id="usedLetters">
+    <strong>Letras já usadas:</strong>
+  </div>
+
+  <script>
+    const wordList = [
+      { word: "ACTIVE DIRECTORY", hint: "Sou como o cérebro da rede. Organizo usuários e permissões." },
+      { word: "GATEWAY", hint: "Permite a troca de dados e, em alguns casos, a tradução de protocolos ou a implementação de segurança" },
+      { word: "IP ESTATICO", hint: "É um endereço numérico único atribuído a cada dispositivo conectado à internet inserido de forma manual" },
+      { word: "LDAPS", hint: "Sou a versão segura de um protocolo de diretório." },
+      { word: "ORACLE VIRTUALBOX", hint: "Nome de um Hypervisor ( tipo Hospedado )" },
+      { word: "GRUPO DE SEGURANÇA", hint: "Sou usado para facilitar a gestão de permissões em massa." },
+      { word: "CNAME ", hint: "Qual é o registro de Nome Canônico" },
+      { word: "BRIDGE", hint: "Permite a VM se conectar como outro computador na rede" }
+    ];
+
+    let currentIndex = 0;
+    let word = wordList[currentIndex].word;
+    let hint = wordList[currentIndex].hint;
+    let revealed = Array.from(word).map(char => (char === ' ' ? ' ' : '_'));
+    const usedLetters = new Set();
+
+    const board = document.getElementById('board');
+    const usedLettersDisplay = document.getElementById('usedLetters');
+    const hintDisplay = document.getElementById('hint');
+
+    function renderBoard() {
+      board.innerHTML = '';
+      revealed.forEach(char => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.textContent = char;
+        board.appendChild(tile);
+      });
+    }
+
+    function updateUsedLettersDisplay() {
+      usedLettersDisplay.innerHTML = '<strong>Letras já usadas:</strong>';
+      usedLetters.forEach(letter => {
+        const span = document.createElement('span');
+        span.textContent = letter;
+        usedLettersDisplay.appendChild(span);
+      });
+    }
+
+    function guessLetter() {
+      const input = document.getElementById('letterInput');
+      const guess = input.value.toUpperCase();
+      input.value = '';
+      if (!guess || guess.length !== 1 || usedLetters.has(guess)) return;
+
+      usedLetters.add(guess);
+
+      for (let i = 0; i < word.length; i++) {
+        if (word[i] === guess) {
+          revealed[i] = guess;
+        }
+      }
+      renderBoard();
+      updateUsedLettersDisplay();
+    }
+
+    function nextWord() {
+      currentIndex = (currentIndex + 1) % wordList.length;
+      loadCurrentWord();
+    }
+
+    function previousWord() {
+      currentIndex = (currentIndex - 1 + wordList.length) % wordList.length;
+      loadCurrentWord();
+    }
+
+    function loadCurrentWord() {
+      word = wordList[currentIndex].word;
+      hint = wordList[currentIndex].hint;
+      revealed = Array.from(word).map(char => (char === ' ' ? ' ' : '_'));
+      usedLetters.clear();
+      hintDisplay.textContent = 'Dica: ' + hint;
+      renderBoard();
+      updateUsedLettersDisplay();
+    }
+
+    renderBoard();
+    updateUsedLettersDisplay();
+  </script>
+</body>
+</html>
